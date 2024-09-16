@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq_ssl_v02
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      # - ./config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf        # RabbitMQ configuration
+      # - ./certs:/etc/rabbitmq/certs                               # SSL certificates
+      - C:/Users/parin/programming_projects/rabbitmq/docker_rabbit/config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf        # RabbitMQ configuration
+      - C:/Users/parin/programming_projects/rabbitmq/docker_rabbit/certs:/etc/rabbitmq/certs                               # SSL certificates
+    ports:
+      - "5671:5671"                                               # SSL port for RabbitMQ
+      - "15672:15672"                                             # Management UI over HTTP (can be configured for HTTPS)
+    restart: always
