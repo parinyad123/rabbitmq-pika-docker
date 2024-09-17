@@ -3,10 +3,18 @@ version: '3.8'
 services:
   rabbitmq:
     image: rabbitmq:3.13-management
-    container_name: rabbitmq_ssl_v02
+    container_name: rabbitmq_ssl_v04
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
+
+      - RABBITMQ_SSL_CACERTFILE = /etc/rabbitmq/certs/ca_certificate.pem
+      - RABBITMQ_SSL_CERTFILE = /etc/rabbitmq/certs/server_certificate.pem
+      - RABBITMQ_SSL_KEYFILE = /etc/rabbitmq/certs/server_key.pem
+
+      - RABBITMQ_MANAGEMENT_SSL_CACERTFILE = $RABBITMQ_SSL_CACERTFILE
+      - RABBITMQ_MANAGEMENT_SSL_CERTFILE = $RABBITMQ_SSL_CERTFILE
+      - RABBITMQ_MANAGEMENT_SSL_KEYFILE = $RABBITMQ_SSL_KEYFILE
     volumes:
       # - ./config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf        # RabbitMQ configuration
       # - ./certs:/etc/rabbitmq/certs                               # SSL certificates
@@ -16,3 +24,21 @@ services:
       - "5671:5671"                                               # SSL port for RabbitMQ
       - "15672:15672"                                             # Management UI over HTTP (can be configured for HTTPS)
     restart: always
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "443:443"  # HTTPS port for NGINX
+    volumes:
+      - ./nginx_config:/etc/nginx/conf.d
+      - ./certs:/etc/nginx/ssl
+    depends_on:
+      - rabbitmq
+    networks:
+      - rabbitmq_network
+
+networks:
+  rabbitmq_network:
+    driver: bridge
+ 
